@@ -18,7 +18,6 @@ print("Step 2: API Key loaded.")
 client = OpenAI(api_key=api_key)
 print("Step 3: OpenAI client initialized.")
 
-# Step 4: Get user query
 if len(sys.argv) < 2:
     print("ERROR: No query provided. Example: python main.py 'fantasy books'")
     sys.exit(1)
@@ -37,7 +36,6 @@ try:
         max_tokens=200
     )
 
-    # Extract and print the response
     answer = response.choices[0].message.content
     print("\nRecommended Books:")
     print(answer)
