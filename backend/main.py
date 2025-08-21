@@ -1,53 +1,44 @@
-import sys
 import os
-from dotenv import load_dotenv
+from flask import Flask, request, jsonify
+from flask_cors import CORS   # ✅ added
+
 from openai import OpenAI
+from dotenv import load_dotenv
 
 # Load API key
 load_dotenv()
 api_key = os.getenv("OPENAI_API_KEY")
-if not api_key:
-    print("ERROR: OPENAI_API_KEY not found in .env")
-    sys.exit(1)
 
 client = OpenAI(api_key=api_key)
 
-if len(sys.argv) < 2:
-    print("Usage: python main.py <your prompt>")
-    sys.exit(1)
+app = Flask(__name__)
+CORS(app)   # ✅ added to allow frontend requests
 
-user_input = " ".join(sys.argv[1:])
+@app.route("/api/prompt", methods=["POST"])
+def run_prompt():
+    data = request.json
+    query = data.get("prompt", "")
 
-# Detect style
-example_count = user_input.count("\n")  # crude but works for now
-if example_count == 0:
-    prompt_type = "zero-shot"
-elif example_count == 1:
-    prompt_type = "one-shot"
-else:
-    prompt_type = "few-shot"
+    if not query:
+        return jsonify({"error": "No prompt provided"}), 400
 
-system_instruction = (
-    f"You are a helpful assistant for book recommendations. "
-    f"The user is giving you a {prompt_type} prompt. "
-    "Always respond directly to the request with no clarifying questions, "
-    "no step-by-step explanations, and no extra commentary. "
-    "Format the answer cleanly and clearly."
-)
-
-messages = [
-    {"role": "system", "content": system_instruction},
-    {"role": "user", "content": user_input}
-]
-
-try:
     response = client.chat.completions.create(
         model="gpt-4o-mini",
-        messages=messages,
-        max_tokens=300
+        messages=[
+            {
+                "role": "system",
+                "content": (
+                    "You are a helpful assistant. The user may give zero-shot, "
+                    "one-shot, or few-shot prompts. Detect the style and respond "
+                    "appropriately with a direct answer."
+                )
+            },
+            {"role": "user", "content": query}
+        ]
     )
 
-    print(response.choices[0].message.content.strip())
+    output = response.choices[0].message.content.strip()
+    return jsonify({"response": output})
 
-except Exception as e:
-    print(f"ERROR: {e}")
+if __name__ == "__main__":
+    app.run(port=5000, debug=True)
