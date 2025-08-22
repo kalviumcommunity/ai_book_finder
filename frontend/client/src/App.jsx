@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import axios from "axios";
-import "./App.css"; // add CSS file
+import "./App.css";
 
 function App() {
   const [prompt, setPrompt] = useState("");
@@ -25,21 +25,6 @@ function App() {
     }
   };
 
-  // Format AI response → split into list items if numbered
-  const formatResponse = (text) => {
-    const lines = text.split(/\d+\.\s/).filter((line) => line.trim() !== "");
-    if (lines.length > 1) {
-      return (
-        <ol>
-          {lines.map((item, i) => (
-            <li key={i} className="book-item">{item.trim()}</li>
-          ))}
-        </ol>
-      );
-    }
-    return <p>{text}</p>;
-  };
-
   return (
     <div className="container">
       <h1>📚 AI Book Finder</h1>
@@ -48,7 +33,7 @@ function App() {
           type="text"
           value={prompt}
           onChange={(e) => setPrompt(e.target.value)}
-          placeholder="e.g. Recommend 5 books for teenagers"
+          placeholder="e.g. Tell me about the book 'Pride and Prejudice'"
         />
         <button type="submit" disabled={loading}>
           {loading ? "Searching..." : "Search"}
@@ -59,7 +44,7 @@ function App() {
         {response && (
           <>
             <h2>Results:</h2>
-            <div className="response-box">{formatResponse(response)}</div>
+            <div className="response-box">{response}</div>
           </>
         )}
       </div>
