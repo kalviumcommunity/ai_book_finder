@@ -13,9 +13,7 @@ function App() {
     setResponse("");
 
     try {
-      const res = await axios.post("http://127.0.0.1:5000/api/prompt", {
-        prompt,
-      });
+      const res = await axios.post("http://127.0.0.1:5000/api/prompt", { prompt });
       setResponse(res.data.response);
     } catch (error) {
       console.error(error);
@@ -26,26 +24,26 @@ function App() {
   };
 
   return (
-    <div className="container">
-      <h1>📚 AI Book Finder</h1>
-      <form onSubmit={handleSubmit} className="search-form">
-        <input
-          type="text"
-          value={prompt}
-          onChange={(e) => setPrompt(e.target.value)}
-          placeholder="e.g. Tell me about the book 'Pride and Prejudice'"
-        />
-        <button type="submit" disabled={loading}>
-          {loading ? "Searching..." : "Search"}
-        </button>
-      </form>
+    <div className="app-container">
+      <div className="card">
+        <h1>📚 AI Book Finder</h1>
+        <form onSubmit={handleSubmit} className="search-form">
+          <input
+            type="text"
+            value={prompt}
+            onChange={(e) => setPrompt(e.target.value)}
+            placeholder="Ask me about books..."
+          />
+          <button type="submit" disabled={loading}>
+            {loading ? "Thinking..." : "Ask"}
+          </button>
+        </form>
 
-      <div className="results">
         {response && (
-          <>
-            <h2>Results:</h2>
-            <div className="response-box">{response}</div>
-          </>
+          <div className="response-box">
+            <strong>AI:</strong>
+            <p>{response}</p>
+          </div>
         )}
       </div>
     </div>
