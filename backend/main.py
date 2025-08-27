@@ -13,6 +13,11 @@ genai.configure(api_key=os.getenv("API_Key"))
 model = genai.GenerativeModel('gemini-1.5-flash')
 embedding_model = genai.GenerativeModel('embedding-001')
 
+def goodreads_link(title: str):
+    if not title:
+        return None
+    return f"https://www.goodreads.com/search?q={requests.utils.quote(title)}"
+
 def get_books(query: str):
     url = f"https://www.googleapis.com/books/v1/volumes?q={query}"
     response = requests.get(url)
@@ -21,18 +26,20 @@ def get_books(query: str):
     if "items" in data:
         for item in data["items"]:
             info = item.get("volumeInfo", {})
+            title = info.get("title")
             results.append({
-                "title": info.get("title"),
+                "title": title,
                 "authors": info.get("authors"),
                 "description": info.get("description"),
-                "link": info.get("infoLink")
+                "link": info.get("infoLink"),
+                "goodreads": goodreads_link(title)
             })
     return results
 
 @app.route("/api/prompt", methods=["POST"])
 def run_prompt():
     data = request.json
-    query = data.get("prompt", "")
+    query = data.get("prompt", "").strip()
     temperature = data.get("temperature", 0.7)  
     top_p = data.get("top_p", 0.9)  
     stop_sequences = data.get("stop", ["END"])  
@@ -41,27 +48,37 @@ def run_prompt():
         return jsonify({"error": "No prompt provided"}), 400
     
     try:
-        # Check if the query is asking for books
-        if any(keyword in query.lower() for keyword in ['book', 'books', 'reading', 'author', 'title']):
-            # Extract search terms from the query
-            search_terms = query.replace('find', '').replace('search', '').replace('books', '').replace('book', '').strip()
-            books = get_books(search_terms)
+        # Always attempt to fetch books for any user prompt
+        books = get_books(query)
+        if len(books) >= 1:
             return jsonify({"response": books})
-        
+
+        # Fallback: ask the model to output 5 book titles, then search again
+        prompt = (
+            "Suggest 5 specific book titles (with authors) matching this request: "
+            f"'{query}'. Return them as lines 'Title — Author'."
+        )
         response = model.generate_content(
-            f"You are a helpful assistant. Always respond in a helpful and informative way. User query: {query}",
+            prompt,
             generation_config=genai.GenerationConfig(
                 temperature=temperature,
                 top_p=top_p,
                 stop_sequences=stop_sequences
             )
         )
+        text = response.candidates[0].content.parts[0].text if response.candidates else ""
+        titles = [line.split(" — ")[0].strip(" -–—") for line in text.splitlines() if line.strip()]
 
-        if response.candidates:
-            text_content = response.candidates[0].content.parts[0].text
-            return jsonify({"response": text_content})
-        else:
-            return jsonify({"error": "No response generated"}), 500
+        aggregated = []
+        for t in titles:
+            search_results = get_books(t)
+            if search_results:
+                aggregated.append(search_results[0])
+        if aggregated:
+            return jsonify({"response": aggregated})
+
+        # Last resort: return model text (rare)
+        return jsonify({"response": text or "No results found."})
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500

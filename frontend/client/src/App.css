@@ -1,64 +1,78 @@
 body {
   background: #f5f7fa;
-  font-family: Arial, sans-serif;
   margin: 0;
-  padding: 0;
+  font-family: Inter, system-ui, Arial, sans-serif;
 }
 
-.app-container {
+.page {
   display: flex;
-  justify-content: center;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  display: flex;
   align-items: center;
-  height: 100vh;
+  justify-content: space-between;
+  padding: 14px 24px;
+  background: #ffffff;
+  border-bottom: 1px solid #e9edf3;
 }
 
-.card {
-  background: #fff;
-  padding: 30px;
-  border-radius: 16px;
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
-  max-width: 700px;
-  width: 100%;
-}
+.brand { display: flex; align-items: center; gap: 12px; }
+.logo { font-size: 22px; }
+.brand-title { font-weight: 700; font-size: 18px; }
+.brand-sub { font-size: 12px; color: #6b7280; margin-top: 2px; }
 
-h1 {
-  text-align: center;
-  margin-bottom: 20px;
-}
-
-.search-form {
-  display: flex;
-  gap: 10px;
-  margin-bottom: 20px;
-}
-
-.search-form input {
-  flex: 1;
-  padding: 12px;
-  border: 1px solid #ccc;
-  border-radius: 8px;
-  font-size: 16px;
-}
-
-.search-form button {
-  background: #28a745;
-  color: white;
-  border: none;
-  padding: 12px 20px;
-  border-radius: 8px;
+.connect-btn {
+  background: #111827;
+  color: #fff;
+  border: 0;
+  padding: 10px 16px;
+  border-radius: 10px;
   cursor: pointer;
-  transition: background 0.3s;
 }
 
-.search-form button:hover {
-  background: #218838;
-}
+.content { max-width: 1100px; margin: 0 auto; padding: 24px; width: 100%; }
 
-.response-box {
-  background: #f1f3f6;
-  padding: 15px 20px;
-  border-radius: 12px;
-  font-size: 16px;
-  line-height: 1.5;
-  white-space: pre-line; /* keeps formatting from AI */
+.chat { display: flex; flex-direction: column; gap: 16px; }
+
+/* Bot message */
+.bot-msg { display: flex; align-items: flex-start; gap: 10px; }
+.bot-avatar { width: 34px; height: 34px; border-radius: 50%; background: #111827; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 16px; }
+
+/* User message */
+.user-msg { display: flex; align-items: flex-start; gap: 10px; justify-content: flex-end; }
+.user-avatar { width: 34px; height: 34px; border-radius: 50%; background: #f59e0b; color: #1f2937; display: flex; align-items: center; justify-content: center; font-size: 16px; order: 2; }
+
+.bubble { background: #fff; border: 1px solid #e5e7eb; padding: 12px 14px; border-radius: 14px; max-width: 800px; line-height: 1.5; }
+.user-bubble { background: #fef3c7; border-color: #fde68a; }
+
+.composer { display: flex; gap: 8px; position: sticky; bottom: 0; background: transparent; padding-top: 8px; }
+.composer input { flex: 1; padding: 14px 16px; border: 1px solid #d1d5db; border-radius: 12px; font-size: 14px; }
+.composer button { background: #f5b342; color: #1f2937; border: none; padding: 0 16px; border-radius: 12px; min-width: 90px; cursor: pointer; }
+
+.chips { display: flex; flex-wrap: wrap; gap: 10px; }
+.chip { border: 1px solid #e5e7eb; background: #fff; padding: 8px 12px; border-radius: 999px; cursor: pointer; font-size: 12px; }
+.chip:hover { background: #f9fafb; }
+
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 18px; margin-top: 8px; }
+.card { background: #fff; border: 1px solid #e5e7eb; border-radius: 16px; overflow: hidden; display: flex; flex-direction: column; }
+.card-body { padding: 16px; display: flex; flex-direction: column; gap: 8px; }
+.card-title { font-weight: 700; font-size: 16px; }
+.card-sub { color: #6b7280; font-size: 13px; }
+.card-desc { color: #374151; font-size: 14px; line-height: 1.5; height: 72px; overflow: hidden; }
+.card-actions { display: flex; gap: 10px; margin-top: 6px; }
+.btn { background: #f5b342; color: #1f2937; text-decoration: none; padding: 8px 12px; border-radius: 10px; font-weight: 600; }
+.btn-outline { border: 1px solid #e5e7eb; color: #111827; text-decoration: none; padding: 8px 12px; border-radius: 10px; }
+
+/* appended readability tweaks */
+.bubble { white-space: pre-wrap; word-wrap: break-word; }
+
+@media (max-width: 640px) {
+  .brand-sub { display: none; }
+  .content { padding: 16px; }
 }
