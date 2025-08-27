@@ -1,13 +1,17 @@
 import os, requests, json
 from flask import Flask, request, jsonify
 from flask_cors import CORS
-from openai import OpenAI
+import google.generativeai as genai
 from dotenv import load_dotenv
 
 app = Flask(__name__)
 CORS(app)
 load_dotenv()
-client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+
+# Configure Gemini API
+genai.configure(api_key=os.getenv("API_Key"))
+model = genai.GenerativeModel('gemini-1.5-flash')
+embedding_model = genai.GenerativeModel('embedding-001')
 
 def get_books(query: str):
     url = f"https://www.googleapis.com/books/v1/volumes?q={query}"
@@ -25,84 +29,44 @@ def get_books(query: str):
             })
     return results
 
-functions = [{
-    "name": "get_books",
-    "description": "Fetch books from Google Books API",
-    "parameters": {
-        "type": "object",
-        "properties": {
-            "query": {
-                "type": "string",
-                "description": "Search term for books, can include author or topic"
-            }
-        },
-        "required": ["query"]
-    }
-}]
-
 @app.route("/api/prompt", methods=["POST"])
 def run_prompt():
     data = request.json
     query = data.get("prompt", "")
     temperature = data.get("temperature", 0.7)  
     top_p = data.get("top_p", 0.9)  
-    top_k = data.get("top_k", 50)  
     stop_sequences = data.get("stop", ["END"])  
 
     if not query:
         return jsonify({"error": "No prompt provided"}), 400
     
     try:
-        response = client.chat.completions.create(
-            model="gpt-4o-mini",
-            messages=[
-                {"role": "system", "content": "You are a helpful assistant. Always respond in structured JSON format."},
-                {"role": "user", "content": query}
-            ],
-            functions=functions,
-            function_call="auto",
-            temperature=temperature,
-            top_p=top_p,
-            top_k=top_k,
-            stop=stop_sequences,
-            response_format={
-                "type": "json_schema",
-                "json_schema": {
-                    "name": "structured_response",
-                    "schema": {
-                        "type": "object",
-                        "properties": {
-                            "answer": {"type": "string"},
-                            "sources": {
-                                "type": "array",
-                                "items": {"type": "string"}
-                            }
-                        },
-                        "required": ["answer"]
-                    }
-                }
-            }
+        # Check if the query is asking for books
+        if any(keyword in query.lower() for keyword in ['book', 'books', 'reading', 'author', 'title']):
+            # Extract search terms from the query
+            search_terms = query.replace('find', '').replace('search', '').replace('books', '').replace('book', '').strip()
+            books = get_books(search_terms)
+            return jsonify({"response": books})
+        
+        response = model.generate_content(
+            f"You are a helpful assistant. Always respond in a helpful and informative way. User query: {query}",
+            generation_config=genai.GenerationConfig(
+                temperature=temperature,
+                top_p=top_p,
+                stop_sequences=stop_sequences
+            )
         )
 
-        # Log token usage
-        usage = response.usage
-        print(f"Tokens used - prompt: {usage.prompt_tokens}, completion: {usage.completion_tokens}, total: {usage.total_tokens}")
-
-        message = response.choices[0].message
-
-        if message.function_call:
-            func_name = message.function_call.name
-            args = json.loads(message.function_call.arguments)
-            if func_name == "get_books":
-                return jsonify({"response": get_books(args["query"])})
-
-        return jsonify({"response": json.loads(message.content)})
+        if response.candidates:
+            text_content = response.candidates[0].content.parts[0].text
+            return jsonify({"response": text_content})
+        else:
+            return jsonify({"error": "No response generated"}), 500
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
 
-# ✅ New route for embeddings
 @app.route("/api/embeddings", methods=["POST"])
 def generate_embeddings():
     try:
@@ -112,12 +76,9 @@ def generate_embeddings():
         if not text:
             return jsonify({"error": "No text provided"}), 400
 
-        response = client.embeddings.create(
-            model="text-embedding-3-small",  # efficient embedding model
-            input=text
-        )
-
-        embedding_vector = response.data[0].embedding
+        # Generate embedding using Gemini's embedding model
+        embedding = embedding_model.embed_content(text)
+        embedding_vector = embedding.embedding
 
         return jsonify({
             "text": text,
