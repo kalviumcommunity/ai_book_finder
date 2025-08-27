@@ -44,9 +44,9 @@ functions = [{
 def run_prompt():
     data = request.json
     query = data.get("prompt", "")
-    temperature = data.get("temperature", 0.7)
-    top_p = data.get("top_p", 1.0)
-    top_k = data.get("top_k", None)
+    temperature = data.get("temperature", 0.7)  
+    top_p = data.get("top_p", 0.9)  
+    top_k = data.get("top_k", 50)  
 
     if not query:
         return jsonify({"error": "No prompt provided"}), 400
@@ -55,21 +55,36 @@ def run_prompt():
         response = client.chat.completions.create(
             model="gpt-4o-mini",
             messages=[
-                {"role": "system", "content": "You are a helpful assistant. Call functions if needed."},
+                {"role": "system", "content": "You are a helpful assistant. Always respond in structured JSON format."},
                 {"role": "user", "content": query}
             ],
             functions=functions,
             function_call="auto",
             temperature=temperature,
             top_p=top_p,
-            top_k=top_k
+            top_k=top_k,
+            response_format={
+                "type": "json_schema",
+                "json_schema": {
+                    "name": "structured_response",
+                    "schema": {
+                        "type": "object",
+                        "properties": {
+                            "answer": {"type": "string"},
+                            "sources": {
+                                "type": "array",
+                                "items": {"type": "string"}
+                            }
+                        },
+                        "required": ["answer"]
+                    }
+                }
+            }
         )
 
-        # ✅ Log token usage in console
-        if hasattr(response, "usage"):
-            print(f"Prompt tokens: {response.usage.prompt_tokens}")
-            print(f"Completion tokens: {response.usage.completion_tokens}")
-            print(f"Total tokens: {response.usage.total_tokens}")
+        # Log token usage
+        usage = response.usage
+        print(f"Tokens used - prompt: {usage.prompt_tokens}, completion: {usage.completion_tokens}, total: {usage.total_tokens}")
 
         message = response.choices[0].message
 
@@ -79,7 +94,7 @@ def run_prompt():
             if func_name == "get_books":
                 return jsonify({"response": get_books(args["query"])})
 
-        return jsonify({"response": message.content.strip()})
+        return jsonify({"response": json.loads(message.content)})
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
