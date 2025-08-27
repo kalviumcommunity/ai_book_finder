@@ -137,9 +137,6 @@ ai_book_finder-1/
         index.css
 ```
 
----
 
-## License
-MIT (or your preferred license)
 
 

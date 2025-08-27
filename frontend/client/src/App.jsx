@@ -74,7 +74,7 @@ function App() {
         <div className="brand">
           <span className="logo">📚</span>
           <div>
-            <div className="brand-title">BookBot</div>
+            <div className="brand-title">Book Finder AI</div>
             <div className="brand-sub">Your AI Book Curator</div>
           </div>
         </div>
