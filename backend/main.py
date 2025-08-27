@@ -63,6 +63,7 @@ def run_prompt():
             temperature=temperature,
             top_p=top_p,
             top_k=top_k,
+            stop=["END_OF_RESPONSE"],  # ✅ Stop sequence added
             response_format={
                 "type": "json_schema",
                 "json_schema": {
