@@ -44,8 +44,9 @@ functions = [{
 def run_prompt():
     data = request.json
     query = data.get("prompt", "")
-    temperature = data.get("temperature", 0.7)  
-    top_p = data.get("top_p", 1.0)  # ✅ default nucleus sampling is 1.0
+    temperature = data.get("temperature", 0.7)
+    top_p = data.get("top_p", 1.0)  
+    top_k = data.get("top_k", None)  # user-provided top_k
 
     if not query:
         return jsonify({"error": "No prompt provided"}), 400
@@ -60,10 +61,21 @@ def run_prompt():
             functions=functions,
             function_call="auto",
             temperature=temperature,
-            top_p=top_p   # ✅ added top_p parameter
+            top_p=top_p,
+            logprobs=True if top_k else False,  # only request logprobs if simulating top-k
         )
 
         message = response.choices[0].message
+
+        # --- Simulate Top-K ---
+        if top_k and hasattr(response.choices[0], "logprobs") and response.choices[0].logprobs:
+            logprobs = response.choices[0].logprobs.content[0].top_logprobs
+            # Take top_k tokens only
+            top_k_tokens = sorted(logprobs.items(), key=lambda x: -x[1])[:top_k]
+            return jsonify({
+                "response": message.content.strip() if message.content else None,
+                "top_k_tokens": top_k_tokens
+            })
 
         if message.function_call:
             func_name = message.function_call.name
