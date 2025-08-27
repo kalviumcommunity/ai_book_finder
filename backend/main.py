@@ -47,6 +47,7 @@ def run_prompt():
     temperature = data.get("temperature", 0.7)  
     top_p = data.get("top_p", 0.9)  
     top_k = data.get("top_k", 50)  
+    stop_sequences = data.get("stop", ["END"])  
 
     if not query:
         return jsonify({"error": "No prompt provided"}), 400
@@ -63,7 +64,7 @@ def run_prompt():
             temperature=temperature,
             top_p=top_p,
             top_k=top_k,
-            stop=["END_OF_RESPONSE"],  # ✅ Stop sequence added
+            stop=stop_sequences,
             response_format={
                 "type": "json_schema",
                 "json_schema": {
@@ -99,6 +100,34 @@ def run_prompt():
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
+
+# ✅ New route for embeddings
+@app.route("/api/embeddings", methods=["POST"])
+def generate_embeddings():
+    try:
+        data = request.json
+        text = data.get("text", "")
+
+        if not text:
+            return jsonify({"error": "No text provided"}), 400
+
+        response = client.embeddings.create(
+            model="text-embedding-3-small",  # efficient embedding model
+            input=text
+        )
+
+        embedding_vector = response.data[0].embedding
+
+        return jsonify({
+            "text": text,
+            "embedding": embedding_vector,
+            "dimensions": len(embedding_vector)
+        })
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
 
 if __name__ == "__main__":
     app.run(port=5000, debug=True)
