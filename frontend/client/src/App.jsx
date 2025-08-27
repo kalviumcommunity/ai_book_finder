@@ -2,6 +2,8 @@ import React, { useEffect, useRef, useState } from "react";
 import axios from "axios";
 import "./App.css";
 
+const API_BASE = import.meta.env?.VITE_API_BASE || "https://ai-book-finder-2.onrender.com";
+
 function App() {
   const [prompt, setPrompt] = useState("");
   const [messages, setMessages] = useState([
@@ -37,7 +39,7 @@ function App() {
     setLoading(true);
 
     try {
-      const res = await axios.post("http://127.0.0.1:5000/api/prompt", { prompt: clean });
+      const res = await axios.post(`${API_BASE}/api/prompt`, { prompt: clean });
       const data = res.data.response;
 
       if (Array.isArray(data)) {
@@ -74,11 +76,11 @@ function App() {
         <div className="brand">
           <span className="logo">📚</span>
           <div>
-            <div className="brand-title">Book Finder AI</div>
+            <div className="brand-title">BookBot</div>
             <div className="brand-sub">Your AI Book Curator</div>
           </div>
         </div>
-        <button className="connect-btn">Find Your Book</button>
+        <button className="connect-btn">Connect AI</button>
       </header>
 
       <main className="content">
@@ -114,10 +116,10 @@ function App() {
                                 View
                               </a>
                             )}
-                            {b.title && (
+                            {(b.goodreads || b.title) && (
                               <a
                                 className="btn-outline"
-                                href={`https://www.goodreads.com/search?q=${encodeURIComponent(b.title)}`}
+                                href={b.goodreads || `https://www.goodreads.com/search?q=${encodeURIComponent(b.title)}`}
                                 target="_blank"
                                 rel="noreferrer"
                               >
