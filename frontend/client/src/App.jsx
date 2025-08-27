@@ -78,7 +78,7 @@ function App() {
             <div className="brand-sub">Your AI Book Curator</div>
           </div>
         </div>
-        <button className="connect-btn">Connect AI</button>
+        <button className="connect-btn">Find Your Book</button>
       </header>
 
       <main className="content">
