@@ -1,7 +1,12 @@
 body {
-  background: #f5f7fa;
+  background: linear-gradient(rgba(255, 255, 255, 0.3), rgba(255, 255, 255, 0.3)), url('/src/assets/background.jpg');
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+  background-repeat: no-repeat;
   margin: 0;
   font-family: Inter, system-ui, Arial, sans-serif;
+  min-height: 100vh;
 }
 
 .page {
@@ -18,12 +23,17 @@ body {
   align-items: center;
   justify-content: space-between;
   padding: 14px 24px;
-  background: #ffffff;
+  background: #ebecf0;
   border-bottom: 1px solid #e9edf3;
 }
 
 .brand { display: flex; align-items: center; gap: 12px; }
-.logo { font-size: 22px; }
+.logo { 
+  width: 32px; 
+  height: 32px; 
+  object-fit: contain;
+  border-radius: 6px;
+}
 .brand-title { font-weight: 700; font-size: 18px; }
 .brand-sub { font-size: 12px; color: #6b7280; margin-top: 2px; }
 
