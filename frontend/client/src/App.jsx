@@ -74,7 +74,7 @@ function App() {
     <div className="page">
       <header className="topbar">
         <div className="brand">
-          <img src="📚" alt="BookBot Logo" className="logo" />
+          <span className="logo" role="img" aria-label="Book FinderAI Logo">📚</span>
           <div>
             <div className="brand-title">Book Finder AI</div>
             <div className="brand-sub">Your AI Book Curator</div>
