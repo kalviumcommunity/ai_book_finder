@@ -76,11 +76,11 @@ function App() {
         <div className="brand">
           <img src="/src/assets/image.png" alt="BookBot Logo" className="logo" />
           <div>
-            <div className="brand-title">Book Finder Ai</div>
+            <div className="brand-title">BookBot</div>
             <div className="brand-sub">Your AI Book Curator</div>
           </div>
         </div>
-        <button className="connect-btn">Find A Book You'll Love</button>
+        <button className="connect-btn">Connect AI</button>
       </header>
 
       <main className="content">
