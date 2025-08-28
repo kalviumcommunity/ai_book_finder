@@ -74,7 +74,7 @@ function App() {
     <div className="page">
       <header className="topbar">
         <div className="brand">
-          <img src="/src/assets/image.png" alt="BookBot Logo" className="logo" />
+          <img src="📚" alt="BookBot Logo" className="logo" />
           <div>
             <div className="brand-title">Book Finder AI</div>
             <div className="brand-sub">Your AI Book Curator</div>
