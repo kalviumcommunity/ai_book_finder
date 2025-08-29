@@ -107,5 +107,35 @@ def generate_embeddings():
         return jsonify({"error": str(e)}), 500
 
 
+# NEW: Chain of Thought Prompting
+@app.route("/api/cot", methods=["POST"])
+def chain_of_thought():
+    try:
+        data = request.json
+        question = data.get("question", "").strip()
+
+        if not question:
+            return jsonify({"error": "No question provided"}), 400
+
+        # CoT prompt: explicitly tell the model to reason step by step
+        prompt = (
+            f"Question: {question}\n\n"
+            "Let's reason step by step and explain the thought process clearly "
+            "before giving the final answer.\n\n"
+            "Final Answer:"
+        )
+
+        response = model.generate_content(prompt)
+        answer = response.candidates[0].content.parts[0].text if response.candidates else "No answer generated."
+
+        return jsonify({
+            "question": question,
+            "cot_response": answer
+        })
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
 if __name__ == "__main__":
     app.run(port=5000, debug=True)
