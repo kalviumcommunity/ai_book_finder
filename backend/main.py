@@ -1,11 +1,13 @@
 import os, requests, json
 from flask import Flask, request, jsonify
 from flask_cors import CORS
+from flask_compress import Compress
 import google.generativeai as genai
 from dotenv import load_dotenv
 
 app = Flask(__name__)
 CORS(app)
+Compress(app)
 load_dotenv()
 
 # Configure Gemini API

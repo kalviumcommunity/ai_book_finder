@@ -1,12 +1,21 @@
 body {
+  background: #f5f7fa;
+  margin: 0;
+  font-family: Inter, system-ui, Arial, sans-serif;
+  min-height: 100vh;
+}
+
+/* Load background image after main content paints */
+body.bg-ready {
   background: linear-gradient(rgba(255, 255, 255, 0.3), rgba(255, 255, 255, 0.3)), url('/src/assets/background.jpg');
   background-size: cover;
   background-position: center;
   background-attachment: fixed;
   background-repeat: no-repeat;
-  margin: 0;
-  font-family: Inter, system-ui, Arial, sans-serif;
-  min-height: 100vh;
+}
+
+@media (prefers-reduced-data: reduce) {
+  body.bg-ready { background: #f5f7fa; }
 }
 
 .page {
